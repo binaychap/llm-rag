@@ -1,8 +1,13 @@
 """FastAPI application for RAG system."""
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
+import io
 from pydantic import BaseModel
 from typing import List, Optional
 from .pipeline import RAGPipeline
+try:
+    from PyPDF2 import PdfReader
+except ModuleNotFoundError:
+    from pypdf import PdfReader
 from .config import config
 
 app = FastAPI(title="LLM RAG API", version="0.1.0")
@@ -83,7 +88,7 @@ async def get_stats():
 
 
 @app.post("/ingest/file")
-async def ingest_file(file: UploadFile = File(...), chunk_size: int = 1000):
+async def ingest_file(file: UploadFile, chunk_size: int = 1000):
     """Ingest documents from a file with automatic chunking."""
     try:
         # Read file content
